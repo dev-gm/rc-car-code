@@ -1,21 +1,21 @@
 CC=gcc
 CFLAGS=-g -I. -Wall -Wextra -pedantic
-LIBS=-lSDL2main -lSDL2 -lbluetooth
-OUTFILE=./out
+LIBS=-lSDL2 -lSDL2_ttf -lSDL2main -lbluetooth
+TARGET=./out
 
-$(OUTFILE): main.c
-	$(CC) -o $(OUTFILE) $< $(CFLAGS) $(LIBS)
+$(TARGET): main.c
+	$(CC) -o $(TARGET) $< $(CFLAGS) $(LIBS) -g
 
 .PHONY: run test debug clean
 
 run:
-	$(OUTFILE)
+	$(TARGET)
 
 test:
 	make && make run
 
 debug:
-	make && gdb $(OUTFILE)
+	make && gdb $(TARGET)
 
 clean:
-	rm $(OUTFILE)
+	rm $(TARGET)
