@@ -1,74 +1,74 @@
-#include "Car.hpp"
+#include "./Car.hpp"
+#include <string.h>
+#include <stdlib.h>
 
-Motor::Motor(const int enable_pin, const int input_pins[2]) {
-    this->enable_pin = enable_pin;
-    pinMode(enable_pin, OUTPUT);
+Motor::Motor(const uint8_t input_pins[2]) {
     this->input_pins = input_pins;
     for (int i = 0; i < 2; ++i)
-        pinMode(enable_pin[i], OUTPUT);
-    state = OFF;
+        pinMode(this->input_pins[i], OUTPUT);
 }
 void Motor::off() {
-    digitalWrite(enable_pin, LOW);
-    state = OFF;
-}
-void Motor::on() {
-    digitalWrite(enable_pin, HIGH);
-    state = ON;
-}
-void Motor::brake() {
+    char *str = (char *) memset(malloc(10), 10, '\0');
+    sprintf(str, "%d, %d - ", this->input_pins[0], this->input_pins[1]);
+    BTSerial.print(str);
+    BTSerial.println("OFF");
     for (int i = 0; i < 2; ++i)
-        digitalWrite(input_pins[i], HIGH);
-    state = Motor::State::BRAKE;
+        digitalWrite(this->input_pins[i], LOW);
 }
 void Motor::forwards() {
-    digitalWrite(input_pins[0], HIGH);
-    digitalWrite(input_pins[1], LOW);
-    state = Motor::State::FORWARDS;
+    char *str = (char *) memset(malloc(10), 10, '\0');
+    sprintf(str, "%d, %d - ", this->input_pins[0], this->input_pins[1]);
+    BTSerial.print(str);
+    BTSerial.println("FORWARDS");
+    digitalWrite(this->input_pins[0], LOW);
+    digitalWrite(this->input_pins[1], HIGH);
 }
 void Motor::backwards() {
-    digitalWrite(input_pins[0], LOW);
-    digitalWrite(input_pins[1], HIGH);
-    state = Motor::State::BACKWARDS;
+    char *str = (char *) memset(malloc(10), 10, '\0');
+    sprintf(str, "%d, %d - ", this->input_pins[0], this->input_pins[1]);
+    BTSerial.print(str);
+    BTSerial.println("BACKWARDS");
+    digitalWrite(this->input_pins[0], HIGH);
+    digitalWrite(this->input_pins[1], LOW);
 }
 Motor::~Motor() {
     off();
 }
 
-Car::Car(const int enable_pins[2], const int input_pins[2][2]) {
-    Motor motor1 (enable_pins[0], input_pins[0]);
-    Motor motor2 (enable_pins[1], input_pins[1]);
-	motors = new Motor[2] { motor1, motor2 };
+Car::Car(Motor motors[2]) {
+  this->motors = motors;
 }
 void Car::off() {
-        for (int i = 0; i < 2; ++i)
-            motors[i].off();
-    }
-void Car::brake() {
+    BTSerial.println("MAIN - OFF");
     for (int i = 0; i < 2; ++i)
-        motors[i].brake();
+        this->motors[i].off();
 }
 void Car::forwards() {
+    BTSerial.println("MAIN - FORWARDS");
     for (int i = 0; i < 2; ++i)
-        motors[i].forwards();
+        this->motors[i].forwards();
 }
 void Car::backwards() {
+    BTSerial.println("MAIN - BACKWARDS");
     for (int i = 0; i < 2; ++i)
-        motors[i].backwards();
+        this->motors[i].backwards();
 }
-void Car::turn_right(int magnitude) {
-    motors[0].forwards();
-    if (magnitude)
-        motors[1].backwards();
+void Car::turn_right(bool sharp) {
+    BTSerial.println("MAIN - TURN RIGHT");
+    this->motors[0].forwards();
+    if (sharp)
+        this->motors[1].backwards();
     else
-        motors[1].off();
+        this->motors[1].off();
 }
-void Car::turn_left(int magnitude) {
-    if (magnitude)
-        motors[0].backwards();
+void Car::turn_left(bool sharp) {
+    BTSerial.println("MAIN - TURN LEFT");
+    this->motors[1].forwards();
+    if (sharp)
+        this->motors[0].backwards();
     else
-        motors[0].off();
-    motors[1].forwards();
+        this->motors[0].off();
+    this->motors[1].forwards();
 }
 Car::~Car() {
     off();

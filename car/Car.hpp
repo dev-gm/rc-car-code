@@ -1,23 +1,14 @@
-#ifndef Car_hpp
-#define Car_hpp
+#ifndef CAR_HPP
+#define CAR_HPP
 #include <Arduino.h>
+#include <SoftwareSerial.h>
 
 class Motor {
 private:
-    static int enable_pin;
-    const static int *input_pins;
-    enum State {
-        ON, // doing nothing
-        OFF,
-        BRAKE,
-        FORWARDS,
-        BACKWARDS,
-    } state;
+    const uint8_t *input_pins;
 public:
-    Motor(const int enable_pin, const int input_pins[2]);
+    Motor(const uint8_t input_pins[2]);
     void off();
-    void on();
-    void brake();
     void forwards();
     void backwards();
     ~Motor();
@@ -25,17 +16,19 @@ public:
 
 class Car {
 private:
-	Motor *motors;
+	  Motor *motors;
 public:
-    Car(const int enable_pins[2], const int input_pins[2][2]);
+    Car(Motor motors[2]);
     void off();
-    void on();
-    void brake();
     void forwards();
     void backwards();
-    void turn_right(int magnitude);
-    void turn_left(int magnitude);
+    void turn_right(bool sharp);
+    void turn_left(bool sharp);
+    void turn_right_backwards(bool sharp);
+    void turn_left_backwards(bool sharp);
     ~Car();
 };
+
+extern SoftwareSerial BTSerial;
 
 #endif
